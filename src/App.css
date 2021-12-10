@@ -1,14 +1,27 @@
 html {
   background-color: black;
   height: 100vh;
-  justify-content: center;
+  /* justify-content: center; */
   align-items: center;
   display: flex;
 }
 
 #maindiv {
-  height: 30vh;
+  height: 80vh;
   width: 100vw;
   align-items: center;
-  display: block;
+  display: flex;
+  position: relative;
+}
+
+.prdtxt {
+  color: brown;
+  visibility: inherit;
+  display: flex;
+  justify-content: flex-start;
+  margin-left: calc(100vw/12);
+  align-items: center;
+  position: relative;
+  height: inherit;
+  width: 100vw;
 }

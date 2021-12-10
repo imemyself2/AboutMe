@@ -6,15 +6,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Suspense } from 'react';
 import { OrbitControls, Stars, useHelper } from "@react-three/drei";
 import { CubeTextureLoader, RGBFormat, sRGBEncoding } from 'three';
-import { WebGLCubeRenderTarget, DirectionalLightHelper } from 'three';
+import { WebGLCubeRenderTarget, DirectionalLightHelper, Raycaster, Vector3, Color } from 'three';
+import PeriodicText from "./periodic_text.png"
 
 const Model = () => {
   const gltf = useLoader(GLTFLoader,'/periodic_logo5.glb')
-  // const cubeRenderTarget = new WebGLCubeRenderTarget(4096)
-  // const cubeCamera = new CubeCamera(1, 1000, cubeRenderTarget);
-  // cubeCamera.position.set(0, 0, 0);
-  // gltf.scene.add(cubeCamera)
-  
   return <primitive object={gltf.scene} dispose={null}/>
 }
 
@@ -46,19 +42,46 @@ const Light = () => {
       castShadow
       position={[1,2,1]} 
       intensity={1} 
-      ref={ref1}
+      // ref={ref1}
       />
-      <directionalLight position={[-2,3,2]} intensity={1} ref={ref2}/>
-      <spotLight intensity={1} position={[2, 0, 0]} />
+      <directionalLight 
+      position={[-4,3,-10]} 
+      intensity={1} 
+      // ref={ref2}
+      />
+      {/* <spotLight intensity={1} position={[2, 0, 0]} /> */}
     </>
   )
 }
 
 const HTMLContent = () => {
+  return(
+    <group position={[-20, 0, 0]}>
+      <Html>
+        <div className="prdtxt">
+          <img src={PeriodicText} alt={"periodic"}/>
+        </div>
+      </Html>
+    </group>
+    
+  )
+}
+
+const ModelContent = () => {
+  const { viewport } = useThree()
+  const moveModel = useRef()
+  
+  useFrame(({ mouse }) => {
+    
+    const x = (mouse.x * viewport.width) / 2
+    const y = (mouse.y * viewport.height) / 2
+    moveModel.current.rotation.x = Math.PI / 2;
+    moveModel.current.position.set(x*0.01, y*0.01, 0.4)
+  })
   return (
     <>
-      <group>
-        <Model></Model>
+      <group ref={moveModel}>
+        <Model />
       </group>
     </>
   );
@@ -67,15 +90,55 @@ function App() {
   return (
     <div id={"maindiv"}>
       <Canvas
-      
-          color
-          camera={{position: [5,5,5], fov: 30}}>
-        <OrbitControls />
-        <Background />
-        <Light/>
+        onCreated={
+          state => {
+            state.camera.position.set(5,0, 15)
+            state.camera.lookAt(0, 0, 0)
+          }
+        }
+        color
+        shadows
+        camera={
+        {position: [2,2,15], fov: 50, scale: 0.5}}
+      >
+        <mesh receiveShadow>
+          <planeBufferGeometry attach="geometry" args={[1000, 1000]} />
+          <meshPhongMaterial attach="material" color="#292929" />
+        </mesh>
+        <OrbitControls 
+          minDistance={4} 
+          maxDistance={20} 
+          maxPolarAngle={Math.PI / 1.5} 
+          minPolarAngle={Math.PI/3} 
+          minAzimuthAngle={-Math.PI/16} 
+          maxAzimuthAngle={Math.PI/16} 
+          autoRotate 
+          enableZoom 
+          autoRotateSpeed={0.2} 
+          enableDamping 
+          dampingFactor={0.02}
+          />
+          <ambientLight intensity={3} color={new Color('grey')}/>
+          <spotLight  
+          intensity={0.5} 
+          position={[-10, -10, 2000000]} 
+          angle={Math.PI/2} 
+          penumbra={0} 
+          shadow-mapSize-width={4096} 
+          shadow-mapSize-height={4096} 
+          castShadow 
+          color={new Color('white')} 
+          decay={30}
+        />
+        
+        {/* <Background /> */}
+        {/* <Light/> */}
+        {/* <HTMLContent />  */}
+        
         <Suspense fallback={null}>
-          <Model />
+          <ModelContent />
         </Suspense> 
+        
       </Canvas>
     </div>
    
